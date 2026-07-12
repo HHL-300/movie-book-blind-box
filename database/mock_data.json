@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "title": "海蒂和爷爷",
+        "type": "movie",
+        "mood_tag": "治愈",
+        "cover": "",
+        "description": "慢节奏温情治愈电影，适合放松心情"
+    },
+    {
+        "id": 2,
+        "title": "宇宙漫游手记",
+        "type": "book",
+        "mood_tag": "放松",
+        "cover": "",
+        "description": "天文科普散文，文字温柔治愈"
+    },
+    {
+        "id": 3,
+        "title": "暗夜追击",
+        "type": "movie",
+        "mood_tag": "悬疑",
+        "cover": "",
+        "description": "高分悬疑推理影片，反转密集"
+    }
+]
