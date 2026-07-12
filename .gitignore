@@ -1,0 +1,16 @@
+# 前端Next.js依赖、缓存文件
+node_modules
+.env.local
+.next
+out
+npm-debug.log
+
+# Python后端虚拟环境、编译缓存
+backend/venv
+backend/__pycache__
+backend/*.pyc
+backend/.env
+
+# Windows、Mac系统垃圾文件
+.DS_Store
+Thumbs.db
