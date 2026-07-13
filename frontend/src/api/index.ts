@@ -1,6 +1,5 @@
 import request from '../utils/request'
 
-// 素材类型定义
 export interface MediaItem {
   id: number
   title: string
@@ -10,37 +9,52 @@ export interface MediaItem {
   intro: string
 }
 
-// 随机全量盲盒
-export const getRandomAll = () => {
-  return request.get<MediaItem>('/random-all')
+export interface ApiResponse<T = any> {
+  code: number
+  msg: string
+  data: T
 }
 
-// 按情绪标签抽取盲盒
-export const getRandomByMood = (mood: string) => {
-  return request.get<MediaItem>(`/random-mood?mood=${mood}`)
+export interface LoginResult {
+  token: string
+  user_id: number
+  username: string
+  avatar: string
 }
 
-// 新增收藏
-export const addFavorite = (userId: number, mediaId: number) => {
-  return request.post('/favorite/add', { user_id: userId, media_id: mediaId })
+export const register = async (username: string, password: string, avatar: string): Promise<ApiResponse<LoginResult>> => {
+  return request.post('/register', { username, password, avatar })
 }
 
-// 取消收藏
-export const delFavorite = (userId: number, mediaId: number) => {
-  return request.post('/favorite/del', { user_id: userId, media_id: mediaId })
+export const login = async (username: string, password: string): Promise<ApiResponse<LoginResult>> => {
+  return request.post('/login', { username, password })
 }
 
-// 查询用户收藏列表
-export const getFavoriteList = (userId: number) => {
-  return request.get<MediaItem[]>(`/favorite/list/${userId}`)
+export const getRandomAll = async (): Promise<ApiResponse<MediaItem>> => {
+  return request.get('/random-all')
 }
 
-// 新增打卡
-export const addCheckin = (userId: number, mediaId: number, content: string) => {
-  return request.post('/checkin/add', { user_id: userId, media_id: mediaId, content })
+export const getRandomByMood = async (mood: string): Promise<ApiResponse<MediaItem>> => {
+  return request.get(`/random-mood?mood=${mood}`)
 }
 
-// 查询用户打卡记录
-export const getCheckinList = (userId: number) => {
-  return request.get<any[]>(`/checkin/list/${userId}`)
+export const addFavorite = async (mediaId: number): Promise<ApiResponse> => {
+  return request.post('/favorite/add', { media_id: mediaId })
+}
+
+export const delFavorite = async (mediaId: number): Promise<ApiResponse> => {
+  return request.post('/favorite/del', { media_id: mediaId })
+}
+
+export const getFavoriteList = async (): Promise<ApiResponse<MediaItem[]>> => {
+  return request.get('/favorite/list')
+}
+
+export const addCheckin = async (mediaId: number, content: string): Promise<ApiResponse> => {
+  const today = new Date().toISOString().split('T')[0]
+  return request.post('/checkin/add', { media_id: mediaId, checkin_date: today, remark: content })
+}
+
+export const getCheckinList = async (): Promise<ApiResponse<any[]>> => {
+  return request.get('/checkin/list')
 }

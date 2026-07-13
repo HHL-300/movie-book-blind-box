@@ -1,3 +1,12 @@
+-- 用户表
+CREATE TABLE IF NOT EXISTS user (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    password VARCHAR(255) NOT NULL COMMENT '密码(bcrypt加密)',
+    avatar VARCHAR(500) DEFAULT '' COMMENT '头像地址',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 作品表：影视、书籍盲盒素材
 CREATE TABLE IF NOT EXISTS media (
     id INT PRIMARY KEY AUTO_INCREMENT,
