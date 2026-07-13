@@ -1,26 +1,189 @@
-@import "tailwindcss";
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --primary: #1677ff;
+  --primary-hover: #4096ff;
+  --bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --text-main: #222;
+  --text-secondary: #666;
+  --border: #e5e7eb;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Microsoft YaHei", system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-main);
+}
+
+/* 导航栏 */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  box-shadow: var(--shadow);
+  z-index: 999;
+}
+.nav-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.nav-link {
+  font-size: 16px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: 0.2s;
+}
+.nav-link.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+.nav-link:hover {
+  color: var(--primary-hover);
+}
+
+/* 页面容器 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 90px 24px 40px;
+}
+
+/* 标题 */
+.page-title {
+  font-size: 42px;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+
+/* 标签按钮组 */
+.tag-group {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.tag-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: white;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 14px;
+}
+.tag-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.tag-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* 主按钮 */
+.main-btn {
+  padding: 12px 32px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-top: 10px;
+}
+.main-btn:hover {
+  background: var(--primary-hover);
+}
+.main-btn:disabled {
+  background: #b3d8ff;
+  cursor: not-allowed;
+}
+
+/* 盲盒结果卡片 */
+.result-card {
+  margin-top: 32px;
+  background: var(--card-bg);
+  padding: 28px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-width: 600px;
+}
+.result-card h3 {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+.result-card .type-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #e8f3ff;
+  color: var(--primary);
+  border-radius: 20px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.result-card p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.collect-btn {
+  padding: 8px 20px;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  background: transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.collect-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+.collect-btn.disabled {
+  border-color: #ccc;
+  color: #999;
+  cursor: default;
+}
+
+/* 空状态 */
+.empty-tip {
+  margin-top: 60px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+/* 打卡页面表单 */
+.checkin-form {
+  max-width: 600px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.checkin-form input,
+.checkin-form textarea {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+}
+.checkin-form textarea {
+  min-height: 120px;
+  resize: vertical;
 }

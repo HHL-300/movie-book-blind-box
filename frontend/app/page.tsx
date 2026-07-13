@@ -1,65 +1,105 @@
-import Image from "next/image";
+'use client'
+import { useState } from 'react'
+import { getRandomAll, getRandomByMood, addFavorite, type MediaItem } from '../src/api'
+const moodList = ['治愈', '解压', '励志', '悬疑', '温暖', '热血']
+const userId = 1
 
 export default function Home() {
+  const [activeMood, setActiveMood] = useState<string>('')
+  const [result, setResult] = useState<MediaItem | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  // 抽取盲盒
+  const handleDraw = async () => {
+    setLoading(true)
+    try {
+      let res
+      if (activeMood) {
+        res = await getRandomByMood(activeMood)
+      } else {
+        res = await getRandomAll()
+      }
+      setResult(res as unknown as MediaItem)
+    } catch (err) {
+      alert('抽取失败，请检查后端服务')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 收藏
+  const handleFavorite = async () => {
+    if (!result) return
+    try {
+      await addFavorite(userId, result.id)
+      alert('收藏成功')
+    } catch (err) {
+      alert('收藏失败')
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="min-h-screen bg-gray-50 p-8 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-8">影视书籍盲盒</h1>
+
+      {/* 情绪标签选择 */}
+      <div className="mb-8">
+        <p className="text-gray-600 mb-3">选择情绪标签（可选）：</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveMood('')}
+            className={`px-4 py-2 rounded-full border transition ${!activeMood ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'}`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            全部
+          </button>
+          {moodList.map(item => (
+            <button
+              key={item}
+              onClick={() => setActiveMood(item)}
+              className={`px-4 py-2 rounded-full border transition ${activeMood === item ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'}`}
+            >
+              {item}
+            </button>
+          ))}
         </div>
-      </main>
-    </div>
-  );
+      </div>
+
+      {/* 抽取按钮 */}
+      <div className="text-center mb-8">
+        <button
+          onClick={handleDraw}
+          disabled={loading}
+          className="px-8 py-3 bg-blue-600 text-white rounded-lg text-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 transition"
+        >
+          {loading ? '抽取中...' : '开启盲盒'}
+        </button>
+      </div>
+
+      {/* 抽取结果 */}
+      {result && (
+        <div className="bg-white rounded-xl shadow p-6">
+          <div className="flex gap-4">
+            <div className="w-32 h-44 bg-gray-200 rounded flex items-center justify-center text-gray-400">
+              封面
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold mb-2">{result.title}</h2>
+              <p className="text-sm text-gray-500 mb-2">
+                类型：{result.type} · 标签：{result.mood_tag}
+              </p>
+              <p className="text-gray-700 text-sm leading-relaxed mb-4">
+                {result.intro}
+              </p>
+              <button
+                onClick={handleFavorite}
+                className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition"
+              >
+                收藏
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  )
 }

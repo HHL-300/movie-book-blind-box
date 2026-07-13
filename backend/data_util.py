@@ -1,3 +1,4 @@
+import pymysql
 from db_connect import get_db_conn, close_conn
 
 # 获取全部影视书籍素材

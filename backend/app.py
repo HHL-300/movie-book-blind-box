@@ -5,7 +5,7 @@ from data_util import get_media_data, filter_by_mood
 from db_connect import get_db_conn, close_conn
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins='http://localhost:3000', supports_credentials=True)
 
 # 测试接口
 @app.route("/api/hello", methods=["GET"])
