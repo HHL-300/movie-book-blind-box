@@ -18,7 +18,7 @@ export default function Home() {
   const [result, setResult] = useState<MediaItem | null>(null)
   const [loading, setLoading] = useState(false)
   const [form] = Form.useForm()
-  const [checkinModalVisible, setCheckinModalVisible] = useState(false)
+  const [checkinModalOpen, setCheckinModalOpen] = useState(false)
   const [checkinContent, setCheckinContent] = useState('')
   const [checkinLoading, setCheckinLoading] = useState(false)
 
@@ -207,7 +207,7 @@ export default function Home() {
   const handleCheckin = () => {
     if (!result || !token) return
     setCheckinContent('')
-    setCheckinModalVisible(true)
+    setCheckinModalOpen(true)
   }
 
   const handleCheckinSubmit = async () => {
@@ -221,7 +221,7 @@ export default function Home() {
       const res = await addCheckin(result.id, checkinContent.trim())
       if (res.code === 200) {
         message.success(res.msg)
-        setCheckinModalVisible(false)
+        setCheckinModalOpen(false)
         setCheckinContent('')
       } else {
         message.error(res.msg)
@@ -449,8 +449,8 @@ export default function Home() {
 
       <Modal
         title="打卡"
-        visible={checkinModalVisible}
-        onCancel={() => setCheckinModalVisible(false)}
+        open={checkinModalOpen}
+        onCancel={() => setCheckinModalOpen(false)}
         onOk={handleCheckinSubmit}
         okText="提交"
         cancelText="取消"

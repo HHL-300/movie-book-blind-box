@@ -8,7 +8,7 @@ import Navbar from '../../src/components/Navbar'
 export default function FavoritesPage() {
   const [list, setList] = useState<MediaItem[]>([])
   const [loading, setLoading] = useState(false)
-  const [checkinModalVisible, setCheckinModalVisible] = useState(false)
+  const [checkinModalOpen, setCheckinModalOpen] = useState(false)
   const [checkinContent, setCheckinContent] = useState('')
   const [checkinLoading, setCheckinLoading] = useState(false)
   const [currentMedia, setCurrentMedia] = useState<MediaItem | null>(null)
@@ -59,7 +59,7 @@ export default function FavoritesPage() {
   const handleCheckin = (item: MediaItem) => {
     setCurrentMedia(item)
     setCheckinContent('')
-    setCheckinModalVisible(true)
+    setCheckinModalOpen(true)
   }
 
   const handleCheckinSubmit = async () => {
@@ -73,7 +73,7 @@ export default function FavoritesPage() {
       const res = await addCheckin(currentMedia.id, checkinContent.trim())
       if (res.code === 200) {
         message.success(res.msg)
-        setCheckinModalVisible(false)
+        setCheckinModalOpen(false)
         setCheckinContent('')
         setCurrentMedia(null)
       } else {
@@ -103,12 +103,12 @@ export default function FavoritesPage() {
 
           {loading && (
             <div style={{ textAlign: 'center', padding: '40px' }}>
-              <Spin tip="加载中..." size="large" />
+              <Spin description="加载中..." size="large" />
             </div>
           )}
 
           {!loading && list.length === 0 && (
-            <Card bordered={false} style={{ borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+            <Card variant="borderless" style={{ borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
               <Empty description="暂无收藏内容" />
             </Card>
           )}
@@ -118,7 +118,7 @@ export default function FavoritesPage() {
               <Card
                 key={item.id}
                 hoverable
-                bordered={false}
+                variant="borderless"
                 style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
               >
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
@@ -160,9 +160,9 @@ export default function FavoritesPage() {
 
       <Modal
         title="打卡"
-        visible={checkinModalVisible}
+        open={checkinModalOpen}
         onCancel={() => {
-          setCheckinModalVisible(false)
+          setCheckinModalOpen(false)
           setCurrentMedia(null)
         }}
         onOk={handleCheckinSubmit}

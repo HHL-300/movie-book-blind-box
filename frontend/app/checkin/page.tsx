@@ -47,12 +47,12 @@ export default function CheckinPage() {
 
           {loading && (
             <div style={{ textAlign: 'center', padding: '40px' }}>
-              <Spin tip="加载中..." size="large" />
+              <Spin description="加载中..." size="large" />
             </div>
           )}
 
           {!loading && list.length === 0 && (
-            <Card bordered={false} style={{ borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+            <Card variant="borderless" style={{ borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
               <Empty description="暂无打卡记录" />
             </Card>
           )}
@@ -63,7 +63,7 @@ export default function CheckinPage() {
               renderItem={(item, index) => (
                 <Card
                   key={index}
-                  bordered={false}
+                  variant="borderless"
                   style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
