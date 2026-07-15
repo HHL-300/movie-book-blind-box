@@ -39,12 +39,15 @@ def insert_user(username: str, password_hash: str, avatar: str):
         return None
 
 
-def insert_favorite(user_id: int, movie_id: int):
+def insert_favorite(user_id: int, movie_id: int, media_type: str = ""):
     try:
-        res = supabase.table("favorites").insert({
+        data = {
             "user_id": user_id,
             "movie_id": movie_id
-        }).execute()
+        }
+        if media_type:
+            data["type"] = media_type
+        res = supabase.table("favorites").insert(data).execute()
         if res.data and len(res.data) > 0:
             return res.data[0]
         return None
@@ -80,14 +83,17 @@ def get_favorites_by_user(user_id: int):
         return []
 
 
-def insert_checkin(user_id: int, movie_id: int, check_in_date: str, remark: str):
+def insert_checkin(user_id: int, movie_id: int, check_in_date: str, remark: str, media_type: str = ""):
     try:
-        res = supabase.table("check_ins").insert({
+        data = {
             "user_id": user_id,
             "movie_id": movie_id,
             "check_in_date": check_in_date,
             "remark": remark
-        }).execute()
+        }
+        if media_type:
+            data["type"] = media_type
+        res = supabase.table("check_ins").insert(data).execute()
         if res.data and len(res.data) > 0:
             return res.data[0]
         return None
@@ -132,7 +138,7 @@ def insert_movie(title: str, type: str, cover: str, description: str):
 
 def get_movie_by_id(movie_id: int):
     try:
-        res = supabase.table("movies").select("id, title, type, cover, description").eq("id", movie_id).execute()
+        res = supabase.table("movies").select("id, title, type, cover, description, mood_tag").eq("id", movie_id).execute()
         if res.data and len(res.data) > 0:
             return res.data[0]
         return None
@@ -147,4 +153,16 @@ def get_movies_by_mood(mood_tag: str):
         return res.data if res.data else []
     except Exception as e:
         print(f"get_movies_by_mood error: {str(e)}", flush=True)
+        return []
+
+
+def get_movies_by_mood_and_type(mood_tag: str, media_type: str):
+    try:
+        query = supabase.table("movies").select("id, title, type, cover, description, mood_tag").eq("mood_tag", mood_tag)
+        if media_type and media_type != '全部':
+            query = query.eq("type", media_type)
+        res = query.execute()
+        return res.data if res.data else []
+    except Exception as e:
+        print(f"get_movies_by_mood_and_type error: {str(e)}", flush=True)
         return []

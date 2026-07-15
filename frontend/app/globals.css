@@ -7,8 +7,9 @@
 }
 
 :root {
-  --primary: #1677ff;
-  --primary-hover: #4096ff;
+  --primary: #6366F1;
+  --primary-hover: #4F46E5;
+  --primary-light: #EEF2FF;
   --bg: #f5f7fa;
   --card-bg: #ffffff;
   --text-main: #222;
@@ -43,18 +44,58 @@ body {
   align-items: center;
   gap: 40px;
 }
+.nav-logo {
+  font-size: 18px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 700;
+}
 .nav-link {
   font-size: 16px;
   color: var(--text-secondary);
   text-decoration: none;
   transition: 0.2s;
-}
-.nav-link.active {
-  color: var(--primary);
-  font-weight: 600;
+  position: relative;
 }
 .nav-link:hover {
   color: var(--primary-hover);
+}
+.nav-active {
+  color: var(--primary);
+  font-weight: 600;
+}
+.nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: 2px;
+}
+.nav-user {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+.user-trigger:hover {
+  background-color: rgba(99, 102, 241, 0.1);
+}
+.user-name {
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
 /* 页面容器 */
@@ -113,8 +154,27 @@ body {
   background: var(--primary-hover);
 }
 .main-btn:disabled {
-  background: #b3d8ff;
+  background: #c7d2fe;
   cursor: not-allowed;
+}
+
+.ant-btn-primary {
+  background-color: #6366F1 !important;
+  border-color: #6366F1 !important;
+}
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #4F46E5 !important;
+  border-color: #4F46E5 !important;
+}
+.ant-btn-primary:active {
+  background-color: #4338CA !important;
+  border-color: #4338CA !important;
+}
+.ant-btn-primary:disabled {
+  background-color: #c7d2fe !important;
+  border-color: #c7d2fe !important;
+  color: white !important;
 }
 
 /* 盲盒结果卡片 */
@@ -133,7 +193,7 @@ body {
 .result-card .type-tag {
   display: inline-block;
   padding: 4px 10px;
-  background: #e8f3ff;
+  background: var(--primary-light);
   color: var(--primary);
   border-radius: 20px;
   font-size: 13px;

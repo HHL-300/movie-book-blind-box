@@ -1,10 +1,9 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Form, Input, Button, Avatar, Card, Tag, message, Modal } from 'antd'
-import { UserOutlined, LockOutlined, UploadOutlined, StarOutlined, StarFilled, CalendarOutlined } from '@ant-design/icons'
+import { Form, Input, Button, Avatar, Card, Tag, message, Modal, Dropdown } from 'antd'
+import { UserOutlined, LockOutlined, UploadOutlined, StarOutlined, StarFilled, CalendarOutlined, LogoutOutlined } from '@ant-design/icons'
 import { getBlindbox, addFavorite, delFavorite, getFavoriteStatus, addCheckin, register, login, type MediaItem, type ApiResponse } from '../src/api'
-
-const DEFAULT_COVER = 'https://api.dicebear.com/7.x/avataaars/svg?seed=movie'
+import CoverImage from '../src/components/CoverImage'
 
 const moodList = ['治愈', '解压', '励志', '悬疑', '温暖', '热血']
 
@@ -17,6 +16,7 @@ export default function Home() {
   const [isLogin, setIsLogin] = useState(true)
   const [uploadedAvatar, setUploadedAvatar] = useState('')
   const [activeMood, setActiveMood] = useState<string>('治愈')
+  const [activeType, setActiveType] = useState<string>('全部')
   const [result, setResult] = useState<MediaItem | null>(null)
   const [loading, setLoading] = useState(false)
   const [form] = Form.useForm()
@@ -175,7 +175,7 @@ export default function Home() {
     }
     setLoading(true)
     try {
-      const res: ApiResponse<MediaItem> = await getBlindbox(activeMood)
+      const res: ApiResponse<MediaItem> = await getBlindbox(activeMood, activeType)
       if (res.code === 200) {
         setResult(res.data)
         setIsFavorited(false)
@@ -258,26 +258,20 @@ export default function Home() {
     <div>
       <nav className="navbar">
         <div className="nav-wrap">
-          <a href="/" className="nav-link active" style={{ fontSize: '18px', fontWeight: '700' }}>
+          <a href="/" className="nav-logo" style={{ fontSize: '18px', fontWeight: '700' }}>
             影视书籍盲盒
           </a>
-          <a href="/" className="nav-link">首页</a>
+          <a href="/" className="nav-link nav-active">首页</a>
           <a href="/favorites" className="nav-link">我的收藏</a>
           <a href="/checkin" className="nav-link">打卡记录</a>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="nav-user">
             {token ? (
-              <div className="dropdown-container">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <Dropdown menu={{ items: [{ key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: handleLogout }] }} placement="bottomRight">
+                <div className="user-trigger">
                   <Avatar src={userInfo?.avatar || DEFAULT_AVATAR} size={32} />
-                  <span style={{ color: '#666' }}>{userInfo?.username}</span>
+                  <span className="user-name">{userInfo?.username}</span>
                 </div>
-                <div className="dropdown-menu">
-                  <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', border: 'none', background: 'none', cursor: 'pointer', width: '100%' }}>
-                    <StarOutlined />
-                    退出登录
-                  </button>
-                </div>
-              </div>
+              </Dropdown>
             ) : (
               <Button
                 onClick={() => setShowAuth(true)}
@@ -310,7 +304,7 @@ export default function Home() {
                       <Avatar
                         src={uploadedAvatar || DEFAULT_AVATAR}
                         size={90}
-                        style={{ cursor: 'pointer', border: '2px solid #1677ff', borderRadius: '50%' }}
+                        style={{ cursor: 'pointer', border: '2px solid #6366F1', borderRadius: '50%' }}
                         onClick={handleAvatarUpload}
                         icon={<UploadOutlined />}
                       />
@@ -391,6 +385,21 @@ export default function Home() {
 
           {token && (
             <>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ color: '#666', marginBottom: '12px', fontSize: '15px' }}>选择素材类型：</p>
+                <div className="tag-group">
+                  {['全部', '电影', '书籍'].map(item => (
+                    <Tag
+                      key={item}
+                      onClick={() => setActiveType(item)}
+                      style={{ cursor: 'pointer', padding: '10px 24px', fontSize: '14px', borderRadius: '20px', backgroundColor: activeType === item ? '#6366F1' : undefined, color: activeType === item ? 'white' : undefined }}
+                    >
+                      {item}
+                    </Tag>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <p style={{ color: '#666', marginBottom: '12px', fontSize: '15px' }}>选择情绪标签：</p>
                 <div className="tag-group">
@@ -398,8 +407,7 @@ export default function Home() {
                     <Tag
                       key={item}
                       onClick={() => setActiveMood(item)}
-                      color={activeMood === item ? 'blue' : undefined}
-                      style={{ cursor: 'pointer', padding: '10px 20px', fontSize: '14px', borderRadius: '20px' }}
+                      style={{ cursor: 'pointer', padding: '10px 20px', fontSize: '14px', borderRadius: '20px', backgroundColor: activeMood === item ? '#6366F1' : undefined, color: activeMood === item ? 'white' : undefined }}
                     >
                       {item}
                     </Tag>
@@ -423,18 +431,15 @@ export default function Home() {
                 <Card title={result.title} style={{ marginTop: '32px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
                   <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                     <div style={{ flexShrink: 0 }}>
-                      <img
-                        src={result.cover && result.cover.trim() ? result.cover : DEFAULT_COVER}
+                      <CoverImage
+                        src={result.cover}
                         alt={result.title}
-                        onError={(e) => {
-                          ;(e.target as HTMLImageElement).src = DEFAULT_COVER
-                        }}
                         style={{ width: '150px', height: '200px', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
                       />
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                        <Tag color="blue" style={{ fontSize: '13px', borderRadius: '4px' }}>{result.type}</Tag>
+                        <Tag style={{ fontSize: '13px', borderRadius: '4px', backgroundColor: '#EEF2FF', color: '#6366F1', borderColor: '#6366F1' }}>{result.type}</Tag>
                         <Tag color="cyan" style={{ fontSize: '13px', borderRadius: '4px' }}>{result.mood_tag}</Tag>
                       </div>
                       <p style={{ color: '#666', lineHeight: '1.8', marginBottom: '16px', fontSize: '15px' }}>{result.intro}</p>
@@ -443,7 +448,7 @@ export default function Home() {
                           type={isFavorited ? 'default' : 'default'}
                           onClick={handleFavorite}
                           icon={isFavorited ? <StarFilled /> : <StarOutlined />}
-                          style={{ borderRadius: '6px', color: isFavorited ? '#faad14' : undefined }}
+                          style={{ borderRadius: '6px', color: isFavorited ? '#6366F1' : undefined }}
                         >
                           {isFavorited ? '已收藏' : '收藏'}
                         </Button>

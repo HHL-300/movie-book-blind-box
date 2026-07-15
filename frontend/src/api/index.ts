@@ -38,8 +38,8 @@ export const getRandomByMood = async (mood: string): Promise<ApiResponse<MediaIt
   return request.get(`/random-mood?mood=${mood}`)
 }
 
-export const getBlindbox = async (moodTag: string): Promise<ApiResponse<MediaItem>> => {
-  return request.post('/get-blindbox', { mood_tag: moodTag })
+export const getBlindbox = async (moodTag: string, selectType?: string): Promise<ApiResponse<MediaItem>> => {
+  return request.post('/get-blindbox', { mood_tag: moodTag, selectType: selectType || '全部' })
 }
 
 export const addFavorite = async (mediaId: number): Promise<ApiResponse> => {
@@ -50,8 +50,8 @@ export const delFavorite = async (mediaId: number): Promise<ApiResponse> => {
   return request.post('/favorite/del', { media_id: mediaId })
 }
 
-export const getFavoriteList = async (): Promise<ApiResponse<MediaItem[]>> => {
-  return request.get('/favorite/list')
+export const getFavoriteList = async (filterType?: string): Promise<ApiResponse<MediaItem[]>> => {
+  return request.get('/favorite/list', { params: { filterType: filterType || '全部收藏' } })
 }
 
 export const getFavoriteStatus = async (mediaId: number): Promise<ApiResponse<{ is_favorited: boolean }>> => {
@@ -63,6 +63,6 @@ export const addCheckin = async (mediaId: number, content: string): Promise<ApiR
   return request.post('/checkin/add', { media_id: mediaId, checkin_date: today, remark: content })
 }
 
-export const getCheckinList = async (): Promise<ApiResponse<any[]>> => {
-  return request.get('/checkin/list')
+export const getCheckinList = async (filterType?: string): Promise<ApiResponse<any[]>> => {
+  return request.get('/checkin/list', { params: { filterType: filterType || '全部打卡' } })
 }

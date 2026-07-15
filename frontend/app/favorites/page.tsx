@@ -4,8 +4,7 @@ import { Card, Button, Modal, Tag, message, Spin, Empty } from 'antd'
 import { DeleteOutlined, StarOutlined, CalendarOutlined } from '@ant-design/icons'
 import { getFavoriteList, delFavorite, addCheckin, type MediaItem, type ApiResponse } from '../../src/api'
 import Navbar from '../../src/components/Navbar'
-
-const DEFAULT_COVER = 'https://api.dicebear.com/7.x/avataaars/svg?seed=movie'
+import CoverImage from '../../src/components/CoverImage'
 
 export default function FavoritesPage() {
   const [list, setList] = useState<MediaItem[]>([])
@@ -14,6 +13,7 @@ export default function FavoritesPage() {
   const [checkinContent, setCheckinContent] = useState('')
   const [checkinLoading, setCheckinLoading] = useState(false)
   const [currentMedia, setCurrentMedia] = useState<MediaItem | null>(null)
+  const [activeType, setActiveType] = useState<string>('全部收藏')
 
   const fetchList = async () => {
     const token = localStorage.getItem('token')
@@ -23,7 +23,7 @@ export default function FavoritesPage() {
     }
     setLoading(true)
     try {
-      const res: ApiResponse<MediaItem[]> = await getFavoriteList()
+      const res: ApiResponse<MediaItem[]> = await getFavoriteList(activeType)
       if (res.code === 200) {
         setList(res.data)
       } else {
@@ -102,7 +102,7 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     fetchList()
-  }, [])
+  }, [activeType])
 
   return (
     <div>
@@ -111,9 +111,23 @@ export default function FavoritesPage() {
       <div className="container">
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <StarOutlined style={{ color: '#1677ff', fontSize: '28px' }} />
+            <StarOutlined style={{ color: '#6366F1', fontSize: '28px' }} />
             我的收藏
           </h1>
+
+          <div style={{ marginBottom: '24px' }}>
+            <div className="tag-group">
+              {['全部收藏', '仅电影', '仅书籍'].map((item) => (
+                <Tag
+                  key={item}
+                  onClick={() => setActiveType(item)}
+                  style={{ cursor: 'pointer', padding: '10px 24px', fontSize: '14px', borderRadius: '20px', backgroundColor: activeType === item ? '#6366F1' : undefined, color: activeType === item ? 'white' : undefined }}
+                >
+                  {item}
+                </Tag>
+              ))}
+            </div>
+          </div>
 
           {loading && (
             <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -137,19 +151,16 @@ export default function FavoritesPage() {
               >
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                   <div className="w-24 h-32 flex-shrink-0">
-                    <img
-                      src={item.cover && item.cover.trim() ? item.cover : DEFAULT_COVER}
+                    <CoverImage
+                      src={item.cover}
                       alt={item.title}
-                      onError={(e) => {
-                        ;(e.target as HTMLImageElement).src = DEFAULT_COVER
-                      }}
                       style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
                     />
                   </div>
                   <div style={{ flex: 1 }}>
                     <h3 className="font-bold mb-2 text-lg" style={{ fontSize: '18px' }}>{item.title}</h3>
                     <div style={{ marginBottom: '10px' }}>
-                      <Tag color="blue" style={{ marginRight: '8px', borderRadius: '4px' }}>{item.type}</Tag>
+                      <Tag style={{ marginRight: '8px', borderRadius: '4px', backgroundColor: '#EEF2FF', color: '#6366F1', borderColor: '#6366F1' }}>{item.type}</Tag>
                       <Tag color="cyan" style={{ borderRadius: '4px' }}>{item.mood_tag}</Tag>
                     </div>
                     <p className="text-gray-600 line-clamp-2 mb-4" style={{ lineHeight: '1.7', fontSize: '14px' }}>{item.intro}</p>

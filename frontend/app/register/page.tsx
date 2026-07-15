@@ -154,7 +154,7 @@ export default function RegisterPage() {
             <Avatar
               src={uploadedAvatar || DEFAULT_AVATAR}
               size={90}
-              style={{ cursor: 'pointer', border: '2px solid #1677ff' }}
+              style={{ cursor: 'pointer', border: '2px solid #6366F1' }}
               onClick={handleAvatarUpload}
               icon={<UploadOutlined />}
             />

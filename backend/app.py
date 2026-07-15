@@ -21,7 +21,8 @@ from db_connect import (
     get_all_movies,
     insert_movie,
     get_movie_by_id,
-    get_movies_by_mood
+    get_movies_by_mood,
+    get_movies_by_mood_and_type
 )
 
 # 初始化Flask应用
@@ -231,24 +232,37 @@ def get_blindbox():
 
         data = request.get_json()
         mood_tag = data.get("mood_tag", "").strip()
+        select_type = data.get("selectType", "").strip() or "全部"
 
-        # 校验情绪标签必须是6个指定标签之一
         valid_moods = ['治愈', '解压', '励志', '悬疑', '温暖', '热血']
+        valid_types = ['全部', '电影', '书籍']
+
         if not mood_tag:
             return fail("请选择情绪标签")
         if mood_tag not in valid_moods:
             return fail(f"无效的情绪标签，可选标签：{valid_moods}")
+        if select_type not in valid_types:
+            return fail(f"无效的类型筛选，可选：{valid_types}")
 
-        # 查询数据库中对应情绪标签的影视素材
-        movies_list = get_movies_by_mood(mood_tag)
+        from db_connect import supabase
+
+        query = supabase.table("movies").select("id, title, type, cover, description, mood_tag").eq("mood_tag", mood_tag)
+
+        if select_type == "电影":
+            query = query.eq("type", "电影")
+        elif select_type == "书籍":
+            query = query.eq("type", "书籍")
+
+        res = query.execute()
+        movies_list = res.data if res.data else []
+
         if not movies_list:
-            return fail(f"暂未收录'{mood_tag}'类别的影视素材")
+            type_text = select_type if select_type != '全部' else ''
+            return fail(f"暂未收录'{mood_tag}'{type_text}类别的影视素材")
 
-        # 随机选择一条返回
         import random
         item = random.choice(movies_list)
 
-        # 字段映射：description -> intro
         res_item = {
             "id": item["id"],
             "title": item["title"],
@@ -288,8 +302,11 @@ def add_favorite():
         if not movie:
             return fail("影视素材不存在")
 
-        # 插入收藏记录
-        insert_favorite(user_id, movie_id)
+        # 获取type值
+        media_type = movie.get("type", "")
+
+        # 插入收藏记录，同步写入type字段
+        insert_favorite(user_id, movie_id, media_type)
 
         return success("收藏成功")
 
@@ -332,18 +349,38 @@ def fav_list():
         if not user_id:
             return fail("请先登录", 401)
 
-        fav_list_data = get_favorites_by_user(user_id)
+        filter_type = request.args.get("filterType", "").strip() or "全部收藏"
+        valid_types = ['全部收藏', '仅电影', '仅书籍']
+
+        if filter_type not in valid_types:
+            return fail(f"无效的类型筛选，可选：{valid_types}")
+
+        from db_connect import supabase
+        
+        query = (
+            supabase.table("favorites")
+            .select("movie_id, movies!inner(id, title, type, cover, description, mood_tag)")
+            .eq("user_id", user_id)
+        )
+        
+        if filter_type == "仅电影":
+            query = query.eq("type", "电影")
+        elif filter_type == "仅书籍":
+            query = query.eq("type", "书籍")
+        
+        res = query.order("created_at", desc=True).execute()
+        fav_list_data = res.data if res.data else []
 
         list_data = []
         for fav in fav_list_data:
-            movie = get_movie_by_id(fav['movie_id'])
+            movie = fav.get("movies", {})
             if movie:
                 temp = {
-                    "id": movie["id"],
-                    "title": movie["title"],
-                    "type": movie["type"],
+                    "id": movie.get("id", 0),
+                    "title": movie.get("title", ""),
+                    "type": movie.get("type", ""),
                     "cover": movie.get("cover", ""),
-                    "intro": movie["description"],
+                    "intro": movie.get("description", ""),
                     "mood_tag": movie.get("mood_tag", "")
                 }
                 list_data.append(temp)
@@ -400,8 +437,11 @@ def add_checkin():
         if not movie:
             return fail("影视素材不存在")
 
-        # 插入打卡记录
-        insert_checkin(user_id, movie_id, check_in_date, remark)
+        # 获取type值
+        media_type = movie.get("type", "")
+
+        # 插入打卡记录，同步写入type字段
+        insert_checkin(user_id, movie_id, check_in_date, remark, media_type)
 
         return success("打卡成功")
 
@@ -419,20 +459,42 @@ def checkin_list():
         if not user_id:
             return fail("请先登录", 401)
 
-        # 获取用户打卡列表
-        checkin_list_data = get_checkins_by_user(user_id)
+        filter_type = request.args.get("filterType", "").strip() or "全部打卡"
+        valid_types = ['全部打卡', '仅电影', '仅书籍']
 
-        # 关联影视信息并扁平化
+        if filter_type not in valid_types:
+            return fail(f"无效的类型筛选，可选：{valid_types}")
+
+        from db_connect import supabase
+        
+        query = (
+            supabase.table("check_ins")
+            .select("id, movie_id, check_in_date, remark, movies!inner(id, title, type, cover, mood_tag)")
+            .eq("user_id", user_id)
+        )
+        
+        if filter_type == "仅电影":
+            query = query.eq("type", "电影")
+        elif filter_type == "仅书籍":
+            query = query.eq("type", "书籍")
+        
+        res = query.order("check_in_date", desc=True).execute()
+        checkin_list_data = res.data if res.data else []
+
         list_data = []
         for checkin in checkin_list_data:
-            movie = get_movie_by_id(checkin['movie_id'])
-            list_data.append({
-                "id": checkin["id"],
-                "movie_id": checkin["movie_id"],
-                "check_in_date": checkin["check_in_date"],
-                "remark": checkin["remark"],
-                "title": movie["title"] if movie else ""
-            })
+            movie = checkin.get("movies", {})
+            if movie:
+                list_data.append({
+                    "id": checkin.get("id", 0),
+                    "movie_id": checkin.get("movie_id", 0),
+                    "check_in_date": checkin.get("check_in_date", ""),
+                    "remark": checkin.get("remark", ""),
+                    "title": movie.get("title", ""),
+                    "type": movie.get("type", ""),
+                    "cover": movie.get("cover", ""),
+                    "mood_tag": movie.get("mood_tag", "")
+                })
 
         return success("获取成功", list_data)
 

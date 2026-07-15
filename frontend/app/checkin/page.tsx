@@ -4,10 +4,12 @@ import { Card, Tag, message, Spin, Empty, List } from 'antd'
 import { ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons'
 import { getCheckinList, type ApiResponse } from '../../src/api'
 import Navbar from '../../src/components/Navbar'
+import CoverImage from '../../src/components/CoverImage'
 
 export default function CheckinPage() {
   const [list, setList] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [activeType, setActiveType] = useState<string>('全部打卡')
 
   const fetchList = async () => {
     const token = localStorage.getItem('token')
@@ -17,7 +19,7 @@ export default function CheckinPage() {
     }
     setLoading(true)
     try {
-      const res: ApiResponse<any[]> = await getCheckinList()
+      const res: ApiResponse<any[]> = await getCheckinList(activeType)
       if (res.code === 200) {
         setList(res.data)
       } else {
@@ -36,7 +38,7 @@ export default function CheckinPage() {
 
   useEffect(() => {
     fetchList()
-  }, [])
+  }, [activeType])
 
   return (
     <div>
@@ -45,9 +47,23 @@ export default function CheckinPage() {
       <div className="container">
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <CalendarOutlined style={{ color: '#1677ff', fontSize: '28px' }} />
+            <CalendarOutlined style={{ color: '#6366F1', fontSize: '28px' }} />
             打卡记录
           </h1>
+
+          <div style={{ marginBottom: '24px' }}>
+            <div className="tag-group">
+              {['全部打卡', '仅电影', '仅书籍'].map((item) => (
+                <Tag
+                  key={item}
+                  onClick={() => setActiveType(item)}
+                  style={{ cursor: 'pointer', padding: '10px 24px', fontSize: '14px', borderRadius: '20px', backgroundColor: activeType === item ? '#6366F1' : undefined, color: activeType === item ? 'white' : undefined }}
+                >
+                  {item}
+                </Tag>
+              ))}
+            </div>
+          </div>
 
           {loading && (
             <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -70,14 +86,28 @@ export default function CheckinPage() {
                   variant="borderless"
                   style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <Tag color="blue" style={{ borderRadius: '4px' }}>{item.title}</Tag>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#999', fontSize: '13px' }}>
-                      <ClockCircleOutlined />
-                      {new Date(item.created_at).toLocaleString()}
+                  <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                    <div className="w-20 h-28 flex-shrink-0">
+                      <CoverImage
+                        src={item.cover}
+                        alt={item.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <Tag style={{ borderRadius: '4px', backgroundColor: '#EEF2FF', color: '#6366F1', borderColor: '#6366F1' }}>{item.title}</Tag>
+                          <Tag color="cyan" style={{ borderRadius: '4px' }}>{item.type}</Tag>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#999', fontSize: '13px' }}>
+                          <ClockCircleOutlined />
+                          {new Date(item.check_in_date).toLocaleString()}
+                        </div>
+                      </div>
+                      <p style={{ color: '#666', lineHeight: '1.7', fontSize: '15px' }}>{item.remark}</p>
                     </div>
                   </div>
-                  <p style={{ color: '#666', lineHeight: '1.7', fontSize: '15px' }}>{item.remark}</p>
                 </Card>
               )}
               bordered={false}

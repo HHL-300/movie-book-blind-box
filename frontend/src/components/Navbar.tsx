@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Button, Avatar, Dropdown, message, Modal } from 'antd'
 import { LogoutOutlined } from '@ant-design/icons'
+import { usePathname } from 'next/navigation'
 
 const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
 
@@ -14,6 +15,7 @@ interface UserInfo {
 export default function Navbar() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [token, setToken] = useState('')
+  const pathname = usePathname()
 
   useEffect(() => {
     const t = localStorage.getItem('token') || ''
@@ -52,21 +54,33 @@ export default function Navbar() {
     }
   ]
 
+  const navLinks = [
+    { path: '/', label: '首页' },
+    { path: '/favorites', label: '我的收藏' },
+    { path: '/checkin', label: '打卡记录' }
+  ]
+
   return (
     <nav className="navbar">
       <div className="nav-wrap">
-        <a href="/" className="nav-link active" style={{ fontSize: '18px', fontWeight: '700' }}>
+        <a href="/" className="nav-logo" style={{ fontSize: '18px', fontWeight: '700' }}>
           影视书籍盲盒
         </a>
-        <a href="/" className="nav-link">首页</a>
-        <a href="/favorites" className="nav-link">我的收藏</a>
-        <a href="/checkin" className="nav-link">打卡记录</a>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {navLinks.map((link) => (
+          <a
+            key={link.path}
+            href={link.path}
+            className={`nav-link ${pathname === link.path ? 'nav-active' : ''}`}
+          >
+            {link.label}
+          </a>
+        ))}
+        <div className="nav-user">
           {token ? (
             <Dropdown menu={{ items: menuItems }} placement="bottomRight">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <div className="user-trigger">
                 <Avatar src={userInfo?.avatar || DEFAULT_AVATAR} size={32} />
-                <span style={{ color: '#666' }}>{userInfo?.username}</span>
+                <span className="user-name">{userInfo?.username}</span>
               </div>
             </Dropdown>
           ) : (
