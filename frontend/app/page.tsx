@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { Form, Input, Button, Avatar, Card, Tag, message, Modal } from 'antd'
-import { UserOutlined, LockOutlined, UploadOutlined, StarOutlined, CalendarOutlined } from '@ant-design/icons'
-import { getRandomAll, getRandomByMood, addFavorite, addCheckin, register, login, type MediaItem, type ApiResponse } from '../src/api'
+import { UserOutlined, LockOutlined, UploadOutlined, StarOutlined, StarFilled, CalendarOutlined } from '@ant-design/icons'
+import { getBlindbox, addFavorite, delFavorite, getFavoriteStatus, addCheckin, register, login, type MediaItem, type ApiResponse } from '../src/api'
+
+const DEFAULT_COVER = 'https://api.dicebear.com/7.x/avataaars/svg?seed=movie'
 
 const moodList = ['治愈', '解压', '励志', '悬疑', '温暖', '热血']
 
@@ -14,11 +16,12 @@ export default function Home() {
   const [showAuth, setShowAuth] = useState(false)
   const [isLogin, setIsLogin] = useState(true)
   const [uploadedAvatar, setUploadedAvatar] = useState('')
-  const [activeMood, setActiveMood] = useState<string>('')
+  const [activeMood, setActiveMood] = useState<string>('治愈')
   const [result, setResult] = useState<MediaItem | null>(null)
   const [loading, setLoading] = useState(false)
   const [form] = Form.useForm()
   const [checkinModalOpen, setCheckinModalOpen] = useState(false)
+  const [isFavorited, setIsFavorited] = useState(false)
   const [checkinContent, setCheckinContent] = useState('')
   const [checkinLoading, setCheckinLoading] = useState(false)
 
@@ -172,19 +175,23 @@ export default function Home() {
     }
     setLoading(true)
     try {
-      let res: ApiResponse<MediaItem>
-      if (activeMood) {
-        res = await getRandomByMood(activeMood)
-      } else {
-        res = await getRandomAll()
-      }
+      const res: ApiResponse<MediaItem> = await getBlindbox(activeMood)
       if (res.code === 200) {
         setResult(res.data)
+        setIsFavorited(false)
+        const statusRes = await getFavoriteStatus(res.data.id)
+        if (statusRes.code === 200) {
+          setIsFavorited(statusRes.data.is_favorited)
+        }
       } else {
         message.error(res.msg)
       }
-    } catch (err) {
-      message.error('抽取失败，请检查后端服务')
+    } catch (err: any) {
+      if (err.message.includes('后端') || err.message.includes('Network')) {
+        message.error('请先启动后端python app.py')
+      } else {
+        message.error('抽取失败，请检查后端服务')
+      }
     } finally {
       setLoading(false)
     }
@@ -193,14 +200,24 @@ export default function Home() {
   const handleFavorite = async () => {
     if (!result || !token) return
     try {
-      const res = await addFavorite(result.id)
+      let res
+      if (isFavorited) {
+        res = await delFavorite(result.id)
+      } else {
+        res = await addFavorite(result.id)
+      }
       if (res.code === 200) {
         message.success(res.msg)
+        setIsFavorited(!isFavorited)
       } else {
         message.error(res.msg)
       }
-    } catch (err) {
-      message.error('收藏失败')
+    } catch (err: any) {
+      if (err.message.includes('后端') || err.message.includes('Network')) {
+        message.error('请先启动后端python app.py')
+      } else {
+        message.error(isFavorited ? '取消收藏失败' : '收藏失败')
+      }
     }
   }
 
@@ -226,8 +243,12 @@ export default function Home() {
       } else {
         message.error(res.msg)
       }
-    } catch (err) {
-      message.error('打卡失败')
+    } catch (err: any) {
+      if (err.message.includes('后端') || err.message.includes('Network')) {
+        message.error('请先启动后端python app.py')
+      } else {
+        message.error('打卡失败')
+      }
     } finally {
       setCheckinLoading(false)
     }
@@ -271,7 +292,7 @@ export default function Home() {
       </nav>
 
       <div className="container">
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '700px', margin: '0 auto' }}>
           <h1 className="page-title">影视书籍盲盒</h1>
 
           <div style={{ marginBottom: '32px', color: '#666', lineHeight: '1.7', fontSize: '15px' }}>
@@ -371,12 +392,12 @@ export default function Home() {
           {token && (
             <>
               <div>
-                <p style={{ color: '#666', marginBottom: '12px', fontSize: '15px' }}>选择情绪标签（可选）：</p>
+                <p style={{ color: '#666', marginBottom: '12px', fontSize: '15px' }}>选择情绪标签：</p>
                 <div className="tag-group">
                   {moodList.map(item => (
                     <Tag
                       key={item}
-                      onClick={() => setActiveMood(activeMood === item ? '' : item)}
+                      onClick={() => setActiveMood(item)}
                       color={activeMood === item ? 'blue' : undefined}
                       style={{ cursor: 'pointer', padding: '10px 20px', fontSize: '14px', borderRadius: '20px' }}
                     >
@@ -400,21 +421,31 @@ export default function Home() {
 
               {result && (
                 <Card title={result.title} style={{ marginTop: '32px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                  <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                    <Tag color="blue" style={{ fontSize: '13px', borderRadius: '4px' }}>{result.type}</Tag>
+                  <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                    <div style={{ flexShrink: 0 }}>
+                      <img
+                        src={result.cover && result.cover.trim() ? result.cover : DEFAULT_COVER}
+                        alt={result.title}
+                        onError={(e) => {
+                          ;(e.target as HTMLImageElement).src = DEFAULT_COVER
+                        }}
+                        style={{ width: '150px', height: '200px', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                      />
+                    </div>
                     <div style={{ flex: 1 }}>
-                      <Tag color="cyan" style={{ fontSize: '13px', marginBottom: '12px', display: 'inline-block', borderRadius: '4px' }}>
-                        {result.mood_tag}
-                      </Tag>
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                        <Tag color="blue" style={{ fontSize: '13px', borderRadius: '4px' }}>{result.type}</Tag>
+                        <Tag color="cyan" style={{ fontSize: '13px', borderRadius: '4px' }}>{result.mood_tag}</Tag>
+                      </div>
                       <p style={{ color: '#666', lineHeight: '1.8', marginBottom: '16px', fontSize: '15px' }}>{result.intro}</p>
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <Button
-                          type="default"
+                          type={isFavorited ? 'default' : 'default'}
                           onClick={handleFavorite}
-                          icon={<StarOutlined />}
-                          style={{ borderRadius: '6px' }}
+                          icon={isFavorited ? <StarFilled /> : <StarOutlined />}
+                          style={{ borderRadius: '6px', color: isFavorited ? '#faad14' : undefined }}
                         >
-                          收藏
+                          {isFavorited ? '已收藏' : '收藏'}
                         </Button>
                         <Button
                           type="primary"

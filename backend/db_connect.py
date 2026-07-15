@@ -1,23 +1,150 @@
-import pymysql
+import os
+from supabase import create_client, Client
 
-# 小皮面板MySQL配置
-DB_CONFIG = {
-    "host": "127.0.0.1",
-    "port": 3306,
-    "user": "root",
-    "password": "123123",
-    "database": "movie_blind_box",
-    "charset": "utf8mb4"
-}
+os.environ["HTTP_PROXY"] = ""
+os.environ["HTTPS_PROXY"] = ""
+os.environ["NO_PROXY"] = "127.0.0.1,localhost,hlrnolfwepywveclkfmg.supabase.co"
 
-# 获取数据库连接
-def get_db_conn():
-    conn = pymysql.connect(**DB_CONFIG)
-    return conn
+SUPABASE_URL = "https://hlrnolfwepywveclkfmg.supabase.co"
+ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhscm5vbGZ3ZXB5d3ZlY2xrZm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwNDM0OTcsImV4cCI6MjA5OTYxOTQ5N30.l0B1VHUDEoUZO5fXdk58hnWwCXYt-hYioNqFtTu5vzI"
+ADMIN_SECRET = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhscm5vbGZ3ZXB5d3ZlY2xrZm1nIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDA0MzQ5NywiZXhwIjoyMDk5NjE5NDk3fQ.EMCxIIYsp38Tyon-O9fv_z4SsC4BSR59a6QfB4ZvLMg"
 
-# 关闭游标与连接
-def close_conn(conn, cursor):
-    if cursor:
-        cursor.close()
-    if conn:
-        conn.close()
+supabase: Client = create_client(SUPABASE_URL, ANON_KEY)
+supabase.postgrest.auth(ADMIN_SECRET)
+
+
+def get_user_by_username(username: str):
+    try:
+        res = supabase.table("users").select("id, username, password_hash, avatar").eq("username", username).execute()
+        if res.data and len(res.data) > 0:
+            return res.data[0]
+        return None
+    except Exception as e:
+        print(f"get_user_by_username error: {str(e)}", flush=True)
+        return None
+
+
+def insert_user(username: str, password_hash: str, avatar: str):
+    try:
+        res = supabase.table("users").insert({
+            "username": username,
+            "password_hash": password_hash,
+            "avatar": avatar
+        }).execute()
+        if res.data and len(res.data) > 0:
+            return res.data[0]
+        return None
+    except Exception as e:
+        print(f"insert_user error: {str(e)}", flush=True)
+        return None
+
+
+def insert_favorite(user_id: int, movie_id: int):
+    try:
+        res = supabase.table("favorites").insert({
+            "user_id": user_id,
+            "movie_id": movie_id
+        }).execute()
+        if res.data and len(res.data) > 0:
+            return res.data[0]
+        return None
+    except Exception as e:
+        print(f"insert_favorite error: {str(e)}", flush=True)
+        return None
+
+
+def get_favorite_by_user_and_movie(user_id: int, movie_id: int):
+    try:
+        res = supabase.table("favorites").select("id").eq("user_id", user_id).eq("movie_id", movie_id).execute()
+        if res.data and len(res.data) > 0:
+            return res.data[0]
+        return None
+    except Exception as e:
+        print(f"get_favorite_by_user_and_movie error: {str(e)}", flush=True)
+        return None
+
+
+def delete_favorite(user_id: int, movie_id: int):
+    try:
+        supabase.table("favorites").delete().eq("user_id", user_id).eq("movie_id", movie_id).execute()
+    except Exception as e:
+        print(f"delete_favorite error: {str(e)}", flush=True)
+
+
+def get_favorites_by_user(user_id: int):
+    try:
+        res = supabase.table("favorites").select("movie_id").eq("user_id", user_id).execute()
+        return res.data if res.data else []
+    except Exception as e:
+        print(f"get_favorites_by_user error: {str(e)}", flush=True)
+        return []
+
+
+def insert_checkin(user_id: int, movie_id: int, check_in_date: str, remark: str):
+    try:
+        res = supabase.table("check_ins").insert({
+            "user_id": user_id,
+            "movie_id": movie_id,
+            "check_in_date": check_in_date,
+            "remark": remark
+        }).execute()
+        if res.data and len(res.data) > 0:
+            return res.data[0]
+        return None
+    except Exception as e:
+        print(f"insert_checkin error: {str(e)}", flush=True)
+        return None
+
+
+def get_checkins_by_user(user_id: int):
+    try:
+        res = supabase.table("check_ins").select("id, movie_id, check_in_date, remark").eq("user_id", user_id).order("check_in_date", desc=True).execute()
+        return res.data if res.data else []
+    except Exception as e:
+        print(f"get_checkins_by_user error: {str(e)}", flush=True)
+        return []
+
+
+def get_all_movies():
+    try:
+        res = supabase.table("movies").select("id, title, type, cover, description").execute()
+        return res.data if res.data else []
+    except Exception as e:
+        print(f"get_all_movies error: {str(e)}", flush=True)
+        return []
+
+
+def insert_movie(title: str, type: str, cover: str, description: str):
+    try:
+        res = supabase.table("movies").insert({
+            "title": title,
+            "type": type,
+            "cover": cover,
+            "description": description
+        }).execute()
+        if res.data and len(res.data) > 0:
+            return res.data[0]
+        return None
+    except Exception as e:
+        print(f"insert_movie error: {str(e)}", flush=True)
+        return None
+
+
+def get_movie_by_id(movie_id: int):
+    try:
+        res = supabase.table("movies").select("id, title, type, cover, description").eq("id", movie_id).execute()
+        if res.data and len(res.data) > 0:
+            return res.data[0]
+        return None
+    except Exception as e:
+        print(f"get_movie_by_id error: {str(e)}", flush=True)
+        return None
+
+
+def get_movies_by_mood(mood_tag: str):
+    try:
+        res = supabase.table("movies").select("id, title, type, cover, description, mood_tag").eq("mood_tag", mood_tag).execute()
+        return res.data if res.data else []
+    except Exception as e:
+        print(f"get_movies_by_mood error: {str(e)}", flush=True)
+        return []

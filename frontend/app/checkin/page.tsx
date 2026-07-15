@@ -23,8 +23,12 @@ export default function CheckinPage() {
       } else {
         message.error(res.msg)
       }
-    } catch (err) {
-      message.error('获取打卡记录失败')
+    } catch (err: any) {
+      if (err.message.includes('后端') || err.message.includes('Network')) {
+        message.error('请先启动后端python app.py')
+      } else {
+        message.error('获取打卡记录失败')
+      }
     } finally {
       setLoading(false)
     }

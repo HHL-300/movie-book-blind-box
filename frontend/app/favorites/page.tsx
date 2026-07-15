@@ -5,6 +5,8 @@ import { DeleteOutlined, StarOutlined, CalendarOutlined } from '@ant-design/icon
 import { getFavoriteList, delFavorite, addCheckin, type MediaItem, type ApiResponse } from '../../src/api'
 import Navbar from '../../src/components/Navbar'
 
+const DEFAULT_COVER = 'https://api.dicebear.com/7.x/avataaars/svg?seed=movie'
+
 export default function FavoritesPage() {
   const [list, setList] = useState<MediaItem[]>([])
   const [loading, setLoading] = useState(false)
@@ -27,8 +29,12 @@ export default function FavoritesPage() {
       } else {
         message.error(res.msg)
       }
-    } catch (err) {
-      message.error('获取收藏列表失败')
+    } catch (err: any) {
+      if (err.message.includes('后端') || err.message.includes('Network')) {
+        message.error('请先启动后端python app.py')
+      } else {
+        message.error('获取收藏列表失败')
+      }
     } finally {
       setLoading(false)
     }
@@ -49,8 +55,12 @@ export default function FavoritesPage() {
           } else {
             message.error(res.msg)
           }
-        } catch (err) {
-          message.error('操作失败')
+        } catch (err: any) {
+          if (err.message.includes('后端') || err.message.includes('Network')) {
+            message.error('请先启动后端python app.py')
+          } else {
+            message.error('操作失败')
+          }
         }
       }
     })
@@ -79,8 +89,12 @@ export default function FavoritesPage() {
       } else {
         message.error(res.msg)
       }
-    } catch (err) {
-      message.error('打卡失败')
+    } catch (err: any) {
+      if (err.message.includes('后端') || err.message.includes('Network')) {
+        message.error('请先启动后端python app.py')
+      } else {
+        message.error('打卡失败')
+      }
     } finally {
       setCheckinLoading(false)
     }
@@ -122,8 +136,15 @@ export default function FavoritesPage() {
                 style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
               >
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                  <div className="w-24 h-32 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl flex items-center justify-center text-gray-400 text-sm font-medium" style={{ background: 'linear-gradient(135deg, #f0f5ff 0%, #e6f7ff 100%)' }}>
-                    {item.type === '电影' ? '🎬' : item.type === '书籍' ? '📚' : '🎵'}
+                  <div className="w-24 h-32 flex-shrink-0">
+                    <img
+                      src={item.cover && item.cover.trim() ? item.cover : DEFAULT_COVER}
+                      alt={item.title}
+                      onError={(e) => {
+                        ;(e.target as HTMLImageElement).src = DEFAULT_COVER
+                      }}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                    />
                   </div>
                   <div style={{ flex: 1 }}>
                     <h3 className="font-bold mb-2 text-lg" style={{ fontSize: '18px' }}>{item.title}</h3>

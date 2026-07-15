@@ -1,22 +1,10 @@
-import pymysql
-from db_connect import get_db_conn, close_conn
+from db_connect import supabase, ADMIN_SECRET
 
-# 获取全部影视书籍素材
+admin_header = {"apikey": ADMIN_SECRET}
+
 def get_media_data():
-    conn = get_db_conn()
-    cursor = conn.cursor(cursor=pymysql.cursors.DictCursor)
-    sql = "SELECT id, title, type, mood_tag, cover, description AS intro FROM media"
-    cursor.execute(sql)
-    data = cursor.fetchall()
-    close_conn(conn, cursor)
-    return data
+    res = supabase.table("movies").select("*").headers(admin_header).execute()
+    return res.data
 
-# 根据情绪标签筛选素材
 def filter_by_mood(tag):
-    conn = get_db_conn()
-    cursor = conn.cursor(cursor=pymysql.cursors.DictCursor)
-    sql = "SELECT id, title, type, mood_tag, cover, description AS intro FROM media WHERE mood_tag = %s"
-    cursor.execute(sql, tag)
-    data = cursor.fetchall()
-    close_conn(conn, cursor)
-    return data
+    return []

@@ -38,6 +38,10 @@ export const getRandomByMood = async (mood: string): Promise<ApiResponse<MediaIt
   return request.get(`/random-mood?mood=${mood}`)
 }
 
+export const getBlindbox = async (moodTag: string): Promise<ApiResponse<MediaItem>> => {
+  return request.post('/get-blindbox', { mood_tag: moodTag })
+}
+
 export const addFavorite = async (mediaId: number): Promise<ApiResponse> => {
   return request.post('/favorite/add', { media_id: mediaId })
 }
@@ -48,6 +52,10 @@ export const delFavorite = async (mediaId: number): Promise<ApiResponse> => {
 
 export const getFavoriteList = async (): Promise<ApiResponse<MediaItem[]>> => {
   return request.get('/favorite/list')
+}
+
+export const getFavoriteStatus = async (mediaId: number): Promise<ApiResponse<{ is_favorited: boolean }>> => {
+  return request.post('/favorite/status', { media_id: mediaId })
 }
 
 export const addCheckin = async (mediaId: number, content: string): Promise<ApiResponse> => {
