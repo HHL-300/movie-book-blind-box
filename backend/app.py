@@ -206,7 +206,6 @@ def random_all():
             "id": item["id"],
             "title": item["title"],
             "type": item["type"],
-            "cover": item["cover"],
             "intro": item["description"]
         }
         return success("获取成功", res_item)
@@ -246,7 +245,7 @@ def get_blindbox():
 
         from db_connect import supabase
 
-        query = supabase.table("movies").select("id, title, type, cover, description, mood_tag").eq("mood_tag", mood_tag)
+        query = supabase.table("movies").select("id, title, type, description, mood_tag").eq("mood_tag", mood_tag)
 
         if select_type == "电影":
             query = query.eq("type", "电影")
@@ -267,7 +266,6 @@ def get_blindbox():
             "id": item["id"],
             "title": item["title"],
             "type": item["type"],
-            "cover": item.get("cover", ""),
             "intro": item["description"],
             "mood_tag": item["mood_tag"]
         }
@@ -359,7 +357,7 @@ def fav_list():
         
         query = (
             supabase.table("favorites")
-            .select("movie_id, movies!inner(id, title, type, cover, description, mood_tag)")
+            .select("movie_id, movies!inner(id, title, type, description, mood_tag)")
             .eq("user_id", user_id)
         )
         
@@ -379,7 +377,6 @@ def fav_list():
                     "id": movie.get("id", 0),
                     "title": movie.get("title", ""),
                     "type": movie.get("type", ""),
-                    "cover": movie.get("cover", ""),
                     "intro": movie.get("description", ""),
                     "mood_tag": movie.get("mood_tag", "")
                 }
@@ -469,7 +466,7 @@ def checkin_list():
         
         query = (
             supabase.table("check_ins")
-            .select("id, movie_id, check_in_date, remark, movies!inner(id, title, type, cover, mood_tag)")
+            .select("id, movie_id, check_in_date, remark, movies!inner(id, title, type, mood_tag)")
             .eq("user_id", user_id)
         )
         
@@ -492,7 +489,6 @@ def checkin_list():
                     "remark": checkin.get("remark", ""),
                     "title": movie.get("title", ""),
                     "type": movie.get("type", ""),
-                    "cover": movie.get("cover", ""),
                     "mood_tag": movie.get("mood_tag", "")
                 })
 

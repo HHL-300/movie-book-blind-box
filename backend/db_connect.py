@@ -113,19 +113,18 @@ def get_checkins_by_user(user_id: int):
 
 def get_all_movies():
     try:
-        res = supabase.table("movies").select("id, title, type, cover, description").execute()
+        res = supabase.table("movies").select("id, title, type, description").execute()
         return res.data if res.data else []
     except Exception as e:
         print(f"get_all_movies error: {str(e)}", flush=True)
         return []
 
 
-def insert_movie(title: str, type: str, cover: str, description: str):
+def insert_movie(title: str, type: str, description: str):
     try:
         res = supabase.table("movies").insert({
             "title": title,
             "type": type,
-            "cover": cover,
             "description": description
         }).execute()
         if res.data and len(res.data) > 0:
@@ -138,7 +137,7 @@ def insert_movie(title: str, type: str, cover: str, description: str):
 
 def get_movie_by_id(movie_id: int):
     try:
-        res = supabase.table("movies").select("id, title, type, cover, description, mood_tag").eq("id", movie_id).execute()
+        res = supabase.table("movies").select("id, title, type, description, mood_tag").eq("id", movie_id).execute()
         if res.data and len(res.data) > 0:
             return res.data[0]
         return None
@@ -149,7 +148,7 @@ def get_movie_by_id(movie_id: int):
 
 def get_movies_by_mood(mood_tag: str):
     try:
-        res = supabase.table("movies").select("id, title, type, cover, description, mood_tag").eq("mood_tag", mood_tag).execute()
+        res = supabase.table("movies").select("id, title, type, description, mood_tag").eq("mood_tag", mood_tag).execute()
         return res.data if res.data else []
     except Exception as e:
         print(f"get_movies_by_mood error: {str(e)}", flush=True)
@@ -158,7 +157,7 @@ def get_movies_by_mood(mood_tag: str):
 
 def get_movies_by_mood_and_type(mood_tag: str, media_type: str):
     try:
-        query = supabase.table("movies").select("id, title, type, cover, description, mood_tag").eq("mood_tag", mood_tag)
+        query = supabase.table("movies").select("id, title, type, description, mood_tag").eq("mood_tag", mood_tag)
         if media_type and media_type != '全部':
             query = query.eq("type", media_type)
         res = query.execute()
