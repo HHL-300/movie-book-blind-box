@@ -40,10 +40,7 @@ export default function RegisterPage() {
       return
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      message.error('图片大小不能超过2MB')
-      return
-    }
+    
 
     const reader = new FileReader()
     reader.onload = (event: ProgressEvent<FileReader>) => {
@@ -166,7 +163,7 @@ export default function RegisterPage() {
               style={{ display: 'none' }}
             />
             <p style={{ color: '#999', fontSize: '12px', marginTop: '10px' }}>
-              点击头像可更换，仅支持jpg/png/webp，最大2MB
+              点击头像可更换，仅支持jpg/png/webp
             </p>
           </div>
 
@@ -175,13 +172,13 @@ export default function RegisterPage() {
             label="用户名"
             rules={[
               { required: true, message: '用户名不能为空' },
-              { min: 6, max: 20, message: '用户名长度需在6-20个字符之间' },
+              { max: 20, message: '用户名长度不能超过20个字符' },
               { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9]+$/, message: '用户名只能包含中英文和数字' }
             ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="请输入用户名（6-20位，中英文和数字）"
+              placeholder="请输入用户名"
             />
           </Form.Item>
 
@@ -196,7 +193,7 @@ export default function RegisterPage() {
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="请输入密码（6-20位，包含字母和数字）"
+              placeholder="请输入密码"
             />
           </Form.Item>
 

@@ -54,10 +54,7 @@ export default function Home() {
       return
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      message.error('图片大小不能超过2MB')
-      return
-    }
+    
 
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -316,7 +313,7 @@ export default function Home() {
                         style={{ display: 'none' }}
                       />
                     </div>
-                    <p style={{ color: '#999', fontSize: '12px', marginTop: '10px' }}>点击头像可更换，仅支持jpg/png/webp，最大2MB</p>
+                    <p style={{ color: '#999', fontSize: '12px', marginTop: '10px' }}>点击头像可更换，仅支持jpg/png/webp</p>
                   </div>
                 )}
 
@@ -328,7 +325,7 @@ export default function Home() {
                     { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9]+$/, message: '用户名只能包含中英文和数字' }
                   ]}
                 >
-                  <Input prefix={<UserOutlined />} placeholder="请输入用户名" />
+                  <Input prefix={<UserOutlined />} placeholder="请输入用户名（1-20位，中英文和数字）" />
                 </Form.Item>
 
                 <Form.Item

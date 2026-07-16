@@ -101,11 +101,11 @@ def register():
         password = data.get("password", "")
         avatar = data.get("avatar", "")
 
-        # 参数校验：账号/密码非空、长度6-20位
+        # 参数校验：账号/密码非空、长度1-20位
         if not username:
             return fail("用户名不能为空")
-        if len(username) < 6 or len(username) > 20:
-            return fail("用户名长度需在6-20个字符之间")
+        if len(username) > 20:
+            return fail("用户名长度不能超过20个字符")
         if not re.match(r'^[\u4e00-\u9fa5a-zA-Z0-9]+$', username):
             return fail("用户名只能包含中英文和数字")
         if not password:
@@ -149,11 +149,11 @@ def login():
         username = data.get("username", "").strip()
         password = data.get("password", "")
 
-        # 参数校验：账号/密码非空、长度6-20位
+        # 参数校验：账号/密码非空、用户名长度1-20位、密码长度6-20位
         if not username:
             return fail("用户名不能为空")
-        if len(username) < 6 or len(username) > 20:
-            return fail("用户名长度需在6-20个字符之间")
+        if len(username) > 20:
+            return fail("用户名长度不能超过20个字符")
         if not password:
             return fail("密码不能为空")
         if len(password) < 6 or len(password) > 20:
