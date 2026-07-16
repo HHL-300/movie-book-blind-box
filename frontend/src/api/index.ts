@@ -5,7 +5,6 @@ export interface MediaItem {
   title: string
   type: string
   mood_tag: string
-  cover: string
   intro: string
 }
 

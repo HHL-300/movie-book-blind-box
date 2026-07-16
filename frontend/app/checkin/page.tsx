@@ -4,7 +4,6 @@ import { Card, Tag, message, Spin, Empty, List } from 'antd'
 import { ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons'
 import { getCheckinList, type ApiResponse } from '../../src/api'
 import Navbar from '../../src/components/Navbar'
-import CoverImage from '../../src/components/CoverImage'
 
 export default function CheckinPage() {
   const [list, setList] = useState<any[]>([])
@@ -87,13 +86,6 @@ export default function CheckinPage() {
                   style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
                 >
                   <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                    <div className="w-20 h-28 flex-shrink-0">
-                      <CoverImage
-                        src={item.cover}
-                        alt={item.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
-                      />
-                    </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <div style={{ display: 'flex', gap: '8px' }}>

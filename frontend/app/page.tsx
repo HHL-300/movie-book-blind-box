@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react'
 import { Form, Input, Button, Avatar, Card, Tag, message, Modal, Dropdown } from 'antd'
 import { UserOutlined, LockOutlined, UploadOutlined, StarOutlined, StarFilled, CalendarOutlined, LogoutOutlined } from '@ant-design/icons'
 import { getBlindbox, addFavorite, delFavorite, getFavoriteStatus, addCheckin, register, login, type MediaItem, type ApiResponse } from '../src/api'
-import CoverImage from '../src/components/CoverImage'
 
 const moodList = ['治愈', '解压', '励志', '悬疑', '温暖', '热血']
 
@@ -174,6 +173,7 @@ export default function Home() {
     try {
       const res: ApiResponse<MediaItem> = await getBlindbox(activeMood, activeType)
       if (res.code === 200) {
+        console.log('抽取返回的movie对象:', res.data)
         setResult(res.data)
         setIsFavorited(false)
         const statusRes = await getFavoriteStatus(res.data.id)
@@ -325,7 +325,7 @@ export default function Home() {
                     { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9]+$/, message: '用户名只能包含中英文和数字' }
                   ]}
                 >
-                  <Input prefix={<UserOutlined />} placeholder="请输入用户名（1-20位，中英文和数字）" />
+                  <Input prefix={<UserOutlined />} placeholder="请输入用户名" />
                 </Form.Item>
 
                 <Form.Item
@@ -426,39 +426,28 @@ export default function Home() {
 
               {result && (
                 <Card title={result.title} style={{ marginTop: '32px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                  <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                    <div style={{ flexShrink: 0 }}>
-                      <CoverImage
-                        src={result.cover}
-                        alt={result.title}
-                        style={{ width: '150px', height: '200px', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                        <Tag style={{ fontSize: '13px', borderRadius: '4px', backgroundColor: '#EEF2FF', color: '#6366F1', borderColor: '#6366F1' }}>{result.type}</Tag>
-                        <Tag color="cyan" style={{ fontSize: '13px', borderRadius: '4px' }}>{result.mood_tag}</Tag>
-                      </div>
-                      <p style={{ color: '#666', lineHeight: '1.8', marginBottom: '16px', fontSize: '15px' }}>{result.intro}</p>
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                        <Button
-                          type={isFavorited ? 'default' : 'default'}
-                          onClick={handleFavorite}
-                          icon={isFavorited ? <StarFilled /> : <StarOutlined />}
-                          style={{ borderRadius: '6px', color: isFavorited ? '#6366F1' : undefined }}
-                        >
-                          {isFavorited ? '已收藏' : '收藏'}
-                        </Button>
-                        <Button
-                          type="primary"
-                          onClick={handleCheckin}
-                          icon={<CalendarOutlined />}
-                          style={{ borderRadius: '6px' }}
-                        >
-                          打卡
-                        </Button>
-                      </div>
-                    </div>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                    <Tag style={{ fontSize: '13px', borderRadius: '4px', backgroundColor: '#EEF2FF', color: '#6366F1', borderColor: '#6366F1' }}>{result.type}</Tag>
+                    <Tag color="cyan" style={{ fontSize: '13px', borderRadius: '4px' }}>{result.mood_tag}</Tag>
+                  </div>
+                  <p style={{ color: '#666', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }}>{result.intro}</p>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <Button
+                      type={isFavorited ? 'default' : 'default'}
+                      onClick={handleFavorite}
+                      icon={isFavorited ? <StarFilled /> : <StarOutlined />}
+                      style={{ borderRadius: '6px', color: isFavorited ? '#6366F1' : undefined }}
+                    >
+                      {isFavorited ? '已收藏' : '收藏'}
+                    </Button>
+                    <Button
+                      type="primary"
+                      onClick={handleCheckin}
+                      icon={<CalendarOutlined />}
+                      style={{ borderRadius: '6px' }}
+                    >
+                      打卡
+                    </Button>
                   </div>
                 </Card>
               )}

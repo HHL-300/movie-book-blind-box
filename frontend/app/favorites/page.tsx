@@ -4,7 +4,6 @@ import { Card, Button, Modal, Tag, message, Spin, Empty } from 'antd'
 import { DeleteOutlined, StarOutlined, CalendarOutlined } from '@ant-design/icons'
 import { getFavoriteList, delFavorite, addCheckin, type MediaItem, type ApiResponse } from '../../src/api'
 import Navbar from '../../src/components/Navbar'
-import CoverImage from '../../src/components/CoverImage'
 
 export default function FavoritesPage() {
   const [list, setList] = useState<MediaItem[]>([])
@@ -150,13 +149,6 @@ export default function FavoritesPage() {
                 style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
               >
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                  <div className="w-24 h-32 flex-shrink-0">
-                    <CoverImage
-                      src={item.cover}
-                      alt={item.title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
-                    />
-                  </div>
                   <div style={{ flex: 1 }}>
                     <h3 className="font-bold mb-2 text-lg" style={{ fontSize: '18px' }}>{item.title}</h3>
                     <div style={{ marginBottom: '10px' }}>
